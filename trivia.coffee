@@ -15,69 +15,64 @@ TriviaData = {
       answer: "Monkey"
     }
     {
-      quesiton: "A sidewinder is what type of creature?"
+      question: "A sidewinder is what type of creature?"
       answer: "Snake"
     }
     {
-      quesiton: "A Harlequin is what type of bird?"
+      question: "A Harlequin is what type of bird?"
       answer: "Duck"
     }
     {
-      quesiton: "A Saki is what type of animal?"
+      question: "A Saki is what type of animal?"
       answer: "Monkey"
     }
     {
-      quesiton: "This Flightless Bird lays the World's largest Eggs?"
+      question: "This Flightless Bird lays the World's largest Eggs?"
       answer: "Ostrich"
     }
     {
-      quesiton: "The Offspring of a male donkey and a female horse is called what?"
+      question: "The Offspring of a male donkey and a female horse is called what?"
       answer: "Mule"
     }
     {
-      quesiton: "An octopus has how many hearts?"
+      question: "An octopus has how many hearts?"
       answer: "3"
     }
     {
-      quesiton: "A lepidopterist collects?"
+      question: "A lepidopterist collects?"
       answer: "Butterflies and moths"
     }
     {
-      quesiton: "Cashmere is sourced from which animal?"
+      question: "Cashmere is sourced from which animal?"
       answer: "Goat"
     }
     {
-      quesiton: "The staple diet of a Koala bear is what?"
+      question: "The staple diet of a Koala bear is what?"
       answer: "Eucalyptus Leaves"
     }
-
     {
-      quesiton: "What creature was Will Smith's codename in the movie Independence day?"
+      question: "What creature was Will Smith's codename in the movie Independence day?"
       answer: "Eagle"
     }
     {
-      quesiton: "What type of animal according to Beatrix Potter was Mr Jeremy Fisher?"
+      question: "What type of animal according to Beatrix Potter was Mr Jeremy Fisher?"
       answer: "Frog"
     }
     {
-      quesiton: "What is the only mammal that can't jump?"
+      question: "What is the only mammal that can't jump?"
       answer: "Elephant"
     }
     {
-      quesiton: "What kind of animal mates only once for 12 hours and can sleep for three years?"
+      question: "What kind of animal mates only once for 12 hours and can sleep for three years?"
       answer: "Snail"
     }
     {
-      quesiton: "A Quagga is an extinct animal that was a distant cousin to which animal that exists today?"
+      question: "A Quagga is an extinct animal that was a distant cousin to which animal that exists today?"
       answer: "Zebra"
     }
     {
-      quesiton: "The study of birds eggs is called what?"
+      question: "The study of birds eggs is called what?"
       answer: "Oology"
-    }
-    {
-      question: "Who is the best?"
-      answer: "Martin"
     }
   ]
 }
