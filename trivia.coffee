@@ -33,6 +33,7 @@ class TriviaGame
         @cache = @robot.brain.data.trivia
 
     @roundTimer = clearTimeout @roundTimer if @roundTimer
+    @unsQuestion()
 
   isRoundInProgress: ->
     return if @roundTimer then true else false
@@ -67,8 +68,11 @@ class TriviaGame
     @newQuestion()
     @robot.reply envelope, 'Round started. Current Question: ' + @getQuestion()
 
-  endRound: (envelope) ->
-    @robot.reply envelope, 'Round finished'
+  endRound: (envelope, winner = false) ->
+    if !winner
+      @robot.reply envelope, 'Round finished - no one guessed the answer correctly!'
+    else
+      @robot.reply envelope, 'Round finished'
     @roundTimer = clearTimeout @roundTimer if @roundTimer
     @unsQuestion()
 
@@ -78,33 +82,30 @@ class TriviaGame
     else
       @robot.reply envelope, 'Round active. Current Question: ' + @getQuestion()
 
-  declareWinner: (name, envelope) ->
-    @robot.reply envelope, 'Congratulations name - you guessed correctly! The answer was: ' + @getAnswer()
-    @endRound envelope
+  declareWinner: (envelope, name) ->
+    @robot.reply envelope, 'Congratulations ' + name + ' - you guessed correctly! The answer was: ' + @getAnswer()
+    @endRound envelope, true
 
 module.exports = (robot) ->
   Trivia = new TriviaGame robot, TriviaData
-  #robot.respond /t/i, (msg) ->
-  robot.hear /^q$/, (msg) -> # Temp to save typing out 'hubot q'
+  robot.respond /q[uestion]?/i, (msg) ->
     if question = Trivia.getQuestion()
       msg.send 'Current Question: ' + question
     else
       msg.send 'There is not an active Trivia round'
 
-  #robot.respond /t/i, (msg) ->
-  robot.hear /^h$/, (msg) -> # Temp to save typing out 'hubot h'
+  robot.respond /h[int]?/i, (msg) ->
     if answerHint = Trivia.getAnswerHint()
       msg.send 'Answer Hint: ' + Trivia.getAnswerHint()
     else
       msg.send 'There is not an active Trivia round'
 
-  robot.hear /^([\s\S]*)$/, (msg) -> # Temp to save typing out 'hubot q'
+  robot.respond /trivia?/i, (msg) ->
+    Trivia.newRound msg.envelope
+
+  robot.hear /^([\s\S]*)$/, (msg) ->
     if Trivia.isRoundInProgress()
       guess = msg.match[1].toLowerCase()
       answer = Trivia.getAnswer().toLowerCase()
       if guess == answer
-        Trivia.declareWinner msg.message.name, msg.envelope
-
-  #robot.respond /t/i, (msg) ->
-  robot.hear /^t$/, (msg) -> # Temp to save typing out 'hubot t'
-    Trivia.newRound msg.envelope
+        Trivia.declareWinner msg.envelope, msg.message.user.name
