@@ -6,7 +6,7 @@
 
 TriviaData = {
   configuration: {
-    roundTime: 1000
+    roundTime: 10000
   }
 
   questions: [
@@ -34,6 +34,9 @@ class TriviaGame
 
     @roundTimer = clearTimeout @roundTimer if @roundTimer
 
+  isRoundInProgress: ->
+    return if @roundTimer then true else false
+
   newQuestion: ->
     @cache['currentQuestion'] = @data.questions[Math.floor(Math.random() * @data.questions.length)]
     @robot.brain.data.trivia = @cache
@@ -49,12 +52,12 @@ class TriviaGame
       return @cache['currentQuestion'].answer
 
   getAnswerHint: ->
-    return @getAnswer().replace /[a-zA-Z]/g, '_'
+    if @cache['currentQuestion']
+      return @getAnswer().replace /[a-zA-Z]/g, '_'
 
   unsQuestion: ->
     delete @cache['currentQuestion']
     @robot.brain.data.trivia = @cache
-
 
   startRound: (envelope) ->
     trigger = =>
@@ -75,6 +78,10 @@ class TriviaGame
     else
       @robot.reply envelope, 'Round active. Current Question: ' + @getQuestion()
 
+  declareWinner: (name, envelope) ->
+    @robot.reply envelope, 'Congratulations name - you guessed correctly! The answer was: ' + @getAnswer()
+    @endRound envelope
+
 module.exports = (robot) ->
   Trivia = new TriviaGame robot, TriviaData
   #robot.respond /t/i, (msg) ->
@@ -90,6 +97,13 @@ module.exports = (robot) ->
       msg.send 'Answer Hint: ' + Trivia.getAnswerHint()
     else
       msg.send 'There is not an active Trivia round'
+
+  robot.hear /^([\s\S]*)$/, (msg) -> # Temp to save typing out 'hubot q'
+    if Trivia.isRoundInProgress()
+      guess = msg.match[1].toLowerCase()
+      answer = Trivia.getAnswer().toLowerCase()
+      if guess == answer
+        Trivia.declareWinner msg.message.name, msg.envelope
 
   #robot.respond /t/i, (msg) ->
   robot.hear /^t$/, (msg) -> # Temp to save typing out 'hubot t'
