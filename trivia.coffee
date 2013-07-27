@@ -6,7 +6,7 @@
 
 TriviaData = {
   configuration: {
-    roundTime: 10000
+    roundTime: 1000
   }
 
   questions: [
@@ -41,11 +41,20 @@ class TriviaGame
     return @cache['currentQuestion']
 
   getQuestion: ->
-    return @cache['currentQuestion']
+    if @cache['currentQuestion']
+      return @cache['currentQuestion'].question
+
+  getAnswer: ->
+    if @cache['currentQuestion']
+      return @cache['currentQuestion'].answer
+
+  getAnswerHint: ->
+    return @getAnswer().replace /[a-zA-Z]/g, '_'
 
   unsQuestion: ->
     delete @cache['currentQuestion']
     @robot.brain.data.trivia = @cache
+
 
   startRound: (envelope) ->
     trigger = =>
@@ -53,7 +62,7 @@ class TriviaGame
     @roundTimer = setTimeout trigger, @data.configuration.roundTime
 
     @newQuestion()
-    @robot.reply envelope, 'Round started. Current Question: ' + @getQuestion().question
+    @robot.reply envelope, 'Round started. Current Question: ' + @getQuestion()
 
   endRound: (envelope) ->
     @robot.reply envelope, 'Round finished'
@@ -64,14 +73,21 @@ class TriviaGame
     if !@roundTimer
       @startRound envelope
     else
-      @robot.reply envelope, 'Round active. Current Question: ' + @getQuestion().question
+      @robot.reply envelope, 'Round active. Current Question: ' + @getQuestion()
 
 module.exports = (robot) ->
   Trivia = new TriviaGame robot, TriviaData
   #robot.respond /t/i, (msg) ->
-  robot.hear /^q$/, (msg) -> # Temp to save typing out 'hubot t'
+  robot.hear /^q$/, (msg) -> # Temp to save typing out 'hubot q'
     if question = Trivia.getQuestion()
-      msg.send 'Current Question: ' + question.question
+      msg.send 'Current Question: ' + question
+    else
+      msg.send 'There is not an active Trivia round'
+
+  #robot.respond /t/i, (msg) ->
+  robot.hear /^h$/, (msg) -> # Temp to save typing out 'hubot h'
+    if answerHint = Trivia.getAnswerHint()
+      msg.send 'Answer Hint: ' + Trivia.getAnswerHint()
     else
       msg.send 'There is not an active Trivia round'
 
