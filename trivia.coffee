@@ -2,7 +2,10 @@
 #   An action packed game of Trivia
 #
 # Commands:
-#   hubot command - Description
+#   hubot trivia - Begins a round of Trivia
+#   hubot q[uestion] - Return the current question
+#   hubot h[int] - Get a hint for the current question
+#   * - Answer a question
 
 TriviaData = {
   configuration: {
