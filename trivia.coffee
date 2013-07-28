@@ -102,7 +102,7 @@ class Round
       @end()
     @roundTimer = setTimeout trigger, roundTime
 
-    @robot.reply @envelope, 'Round started. Current Question: ' + @question.question()
+    @robot.reply @envelope, 'Round started. Round time 10seconds. Current Question: ' + @question.question()
 
   end: (winner = false) ->
     if !winner
