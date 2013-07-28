@@ -117,11 +117,6 @@ class Round
 
 class TriviaGame
   constructor: (@robot, @data) ->
-    @cache = {}
-
-    @robot.brain.on 'loaded', =>
-      if @robot.brain.data.trivia
-        @cache = @robot.brain.data.trivia
 
   newQuestion: ->
     questionData = @data.questions[Math.floor(Math.random() * @data.questions.length)]
