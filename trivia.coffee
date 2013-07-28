@@ -80,8 +80,42 @@ TriviaData = {
   ]
 }
 
-class TriviaGame
+class Question
+  constructor: (@questionData) ->
 
+  question: ->
+    return @questionData.question
+
+  answer: ->
+    return @questionData.answer
+
+  answerHint: ->
+    return @answer().replace /[a-zA-Z0-9]/g, '_'
+
+  # cant seem to get propertyMissing & __noSuchMethod__ to work...
+
+class Round
+  constructor: (@robot, @envelope, @question) ->
+
+  start: (roundTime) ->
+    trigger = =>
+      @end()
+    @roundTimer = setTimeout trigger, roundTime
+
+    @robot.reply @envelope, 'Round started. Current Question: ' + @question.question()
+
+  end: (winner = false) ->
+    if !winner
+      @robot.reply @envelope, 'Round finished - no one guessed the answer correctly!'
+    else
+      @robot.reply @envelope, 'Round finished'
+    @roundTimer = clearTimeout @roundTimer if @roundTimer
+    delete @question
+
+  isInProgress: ->
+    return if @roundTimer then true else false
+
+class TriviaGame
   constructor: (@robot, @data) ->
     @cache = {}
 
@@ -89,71 +123,33 @@ class TriviaGame
       if @robot.brain.data.trivia
         @cache = @robot.brain.data.trivia
 
-    @roundTimer = clearTimeout @roundTimer if @roundTimer
-    @unsQuestion()
-
-  isRoundInProgress: ->
-    return if @roundTimer then true else false
-
   newQuestion: ->
-    @cache['currentQuestion'] = @data.questions[Math.floor(Math.random() * @data.questions.length)]
-    @robot.brain.data.trivia = @cache
-
-    return @cache['currentQuestion']
-
-  getQuestion: ->
-    if @cache['currentQuestion']
-      return @cache['currentQuestion'].question
-
-  getAnswer: ->
-    if @cache['currentQuestion']
-      return @cache['currentQuestion'].answer
-
-  getAnswerHint: ->
-    if @cache['currentQuestion']
-      return @getAnswer().replace /[a-zA-Z]/g, '_'
-
-  unsQuestion: ->
-    delete @cache['currentQuestion']
-    @robot.brain.data.trivia = @cache
-
-  startRound: (envelope) ->
-    trigger = =>
-      @endRound envelope
-    @roundTimer = setTimeout trigger, @data.configuration.roundTime
-
-    @newQuestion()
-    @robot.reply envelope, 'Round started. Current Question: ' + @getQuestion()
-
-  endRound: (envelope, winner = false) ->
-    if !winner
-      @robot.reply envelope, 'Round finished - no one guessed the answer correctly!'
-    else
-      @robot.reply envelope, 'Round finished'
-    @roundTimer = clearTimeout @roundTimer if @roundTimer
-    @unsQuestion()
+    questionData = @data.questions[Math.floor(Math.random() * @data.questions.length)]
+    @question = new Question questionData
 
   newRound: (envelope) ->
-    if !@roundTimer
-      @startRound envelope
+    if !@round or !@round.isInProgress()
+      @round = new Round @robot, envelope, @newQuestion()
+      @round.start @data.configuration.roundTime
     else
-      @robot.reply envelope, 'Round active. Current Question: ' + @getQuestion()
+      @robot.reply envelope, 'Round active. Current Question: ' + @round.question.question()
 
   declareWinner: (envelope, name) ->
-    @robot.reply envelope, 'Congratulations ' + name + ' - you guessed correctly! The answer was: ' + @getAnswer()
-    @endRound envelope, true
+    @robot.reply envelope, 'Congratulations ' + name + ' - you guessed correctly! The answer was: ' + @round.question.answer()
+    @round.end true
 
 module.exports = (robot) ->
   Trivia = new TriviaGame robot, TriviaData
+
   robot.respond /q[uestion]?/i, (msg) ->
-    if question = Trivia.getQuestion()
-      msg.send 'Current Question: ' + question
+    if Trivia.round and question = Trivia.round.question
+      msg.send 'Current Question: ' + question.question()
     else
       msg.send 'There is not an active Trivia round'
 
   robot.respond /h[int]?/i, (msg) ->
-    if answerHint = Trivia.getAnswerHint()
-      msg.send 'Answer Hint: ' + Trivia.getAnswerHint()
+    if Trivia.round and question = Trivia.round.question
+      msg.send 'Answer Hint: ' + question.answerHint()
     else
       msg.send 'There is not an active Trivia round'
 
@@ -161,8 +157,8 @@ module.exports = (robot) ->
     Trivia.newRound msg.envelope
 
   robot.hear /^([\s\S]*)$/, (msg) ->
-    if Trivia.isRoundInProgress()
+    if Trivia.round and Trivia.round.isInProgress()
       guess = msg.match[1].toLowerCase()
-      answer = Trivia.getAnswer().toLowerCase()
+      answer = Trivia.round.question.answer().toLowerCase()
       if guess == answer
         Trivia.declareWinner msg.envelope, msg.message.user.name
